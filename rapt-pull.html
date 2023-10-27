@@ -1,0 +1,81 @@
+<script type="text/html" data-template-name="rapt-credentials">
+    <div class="form-row">
+        <label style="margin-left: 20px;" for="node-config-input-user_name"><span >user name</span></label>
+        <input type="password" id="node-config-input-user_name">
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 20px;" for="node-config-input-api_secret"><span >secret</span></label>
+        <input type="password" id="node-config-input-api_secret">
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 20px;" for="node-config-input-access_token"><span >token</span></label>
+        <input type="password" id="node-config-input-access_token">
+    </div>
+</script>
+
+
+<script type="text/javascript">
+(function() {
+    var raptConfigNodeId = null;
+    var raptConfigNodeIntervalId = null;
+
+    RED.nodes.registerType('rapt-credentials',{
+        category: 'config',
+        defaults: {
+        },
+        credentials: {
+            user_name: {type:"text"},
+            api_secret: {type:"password"},
+            access_token: {type:"password"}
+        },
+        label: function() {
+            return configured
+        },
+        exportable: false,
+        oneditsave: function() {
+            var trimFields = [
+                "user_name","api_secret","access_token"
+            ];
+            // Just in case any whitespace has crept in with the copy-paste of the fields
+            trimFields.forEach(function(field) {
+                var v = $("#node-config-input-"+field).val();
+                v = v.trim();
+                $("#node-config-input-"+field).val(v);
+
+            });
+        }
+    });
+})();
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rapt-pull',{
+        category: 'function',
+        color: '#a6bbcf',
+        defaults: {
+            rapt: {type:"rapt-credentials",required:true},
+            name: {value:""}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "file.svg",
+        label: function() {
+            return this.name||"rapt-pull";
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="rapt-pull">
+    <div class="form-row">
+        <label for="node-input-rapt"> <span >credentials</span></label>
+        <input type="text" id="node-input-rapt">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="rapt-pull">
+    <p>A simple node that converts the message payloads into all lower-case characters</p>
+</script>
