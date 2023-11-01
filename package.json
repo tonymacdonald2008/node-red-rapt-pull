@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "Simple node to pull data from RAPT cloud for integration into node red flows",
   "dependencies": {
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "twitter-ng": "^0.6.2"
   },
   "main": "rapt-poll.js",
   "scripts": {
