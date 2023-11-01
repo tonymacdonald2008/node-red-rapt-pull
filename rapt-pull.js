@@ -11,9 +11,7 @@ module.exports = function(RED) {
     RED.nodes.registerType("rapt-credentials",RaptCredentialsNode, {
         credentials: {
             user_name: {type:"text"},
-            api_secret: {type:"password"},
-            access_token: {type:"password"},
-            token_timeout: {type:"text"}
+            api_secret: {type:"password"}
         }
     });
 

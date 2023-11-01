@@ -7,14 +7,6 @@
         <label style="margin-left: 20px;" for="node-config-input-api_secret"><span >secret</span></label>
         <input type="password" id="node-config-input-api_secret">
     </div>
-    <div class="form-row">
-        <label style="margin-left: 20px;" for="node-config-input-access_token"><span >token</span></label>
-        <input type="password" id="node-config-input-access_token">
-    </div>
-    <div class="form-row">
-        <label style="margin-left: 20px;" for="node-config-input-token_timeout"><span >timout</span></label>
-        <input type="text" id="node-config-input-token_timeout">
-    </div>
 </script>
 
 
@@ -29,9 +21,7 @@
         },
         credentials: {
             user_name: {type:"text"},
-            api_secret: {type:"password"},
-            access_token: {type:"password"},
-            token_timeout: {type:"text"}
+            api_secret: {type:"password"}
         },
         label: function() {
             return this.user_name;
@@ -39,7 +29,7 @@
         exportable: false,
         oneditsave: function() {
             var trimFields = [
-                "user_name","api_secret","access_token"
+                "user_name","api_secret"
             ];
             // Just in case any whitespace has crept in with the copy-paste of the fields
             trimFields.forEach(function(field) {

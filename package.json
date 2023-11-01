@@ -1,10 +1,14 @@
 {
-  "name": "node-red-rapt-integration",
+  "name": "@tonymacdonald/node-red-rapt-integration",
   "version": "0.0.1",
   "description": "Simple node to pull data from RAPT cloud for integration into node red flows",
   "dependencies": {
-    "request": "^2.88.2",
-    "twitter-ng": "^0.6.2"
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "node-red": "^3.0.2",
+    "node-red-node-test-helper": "^0.3.2"
   },
   "main": "rapt-poll.js",
   "scripts": {
@@ -18,15 +22,19 @@
     "node-red",
     "rapt"
   ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "node-red": {
+    "version": ">=1.0.0",
+    "nodes": {
+      "rapt-pull": "rapt-pull.js"
+    }
+  },
   "author": "Tony MacDonald",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/tonymacdonald2008/node-red-rapt-integration/issues"
   },
-  "homepage": "https://github.com/tonymacdonald2008/node-red-rapt-integration#readme",
-  "node-red": {
-    "nodes": {
-      "rapt-pull": "rapt-pull.js"
-    }
-  }
+  "homepage": "https://github.com/tonymacdonald2008/node-red-rapt-integration#readme"
 }
