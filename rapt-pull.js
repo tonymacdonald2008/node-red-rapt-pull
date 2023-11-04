@@ -105,12 +105,23 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,config);
         var node = this;
         this.rapt = config.rapt;
+        this.name = config.name;
+        this.endpoint = config.endpoint;
         this.raptConfig = RED.nodes.getNode(this.rapt);
         var credentials = RED.nodes.getCredentials(this.rapt);
+        var opts = {};
         node.on('input', function(msg) {
+            switch (this.endpoint){
+                case 'GetHydrometer':
+                case 'GetTelemetry':
+                    opts = {hydrometerId: msg.payload[0].id};
+                    break;
+                default:
+                opts = {};
+                
+            }
             this.raptConfig.authorise()
-            .then(() =>this.gethydrometers())
-            .then((result) =>this.gethydrometer(result[0].id))
+            .then(() =>this.getEndpoint(this.endpoint,opts))
             .then((result) => {
                 msg.payload = result;
                 node.send(msg);
@@ -120,7 +131,7 @@ module.exports = function(RED) {
     
     RED.nodes.registerType("rapt-pull",RaptPullNode);
     
-    RaptPullNode.prototype.gethydrometers = function() {
+    RaptPullNode.prototype.GetHydrometers = function() {
         var node = this;
 
         let url = "https://api.rapt.io/api/Hydrometers/GetHydrometers";
@@ -135,13 +146,45 @@ module.exports = function(RED) {
         })
     }
     
-        RaptPullNode.prototype.gethydrometer = function(hydrometerId) {
+    RaptPullNode.prototype.GetHydrometer = function(hydrometerId) {
         var node = this;
         node.warn("hydrometerId provided: "+hydrometerId);
 
         let url = "https://api.rapt.io/api/Hydrometers/GetHydrometer";
         let opts = {hydrometerId: hydrometerId};
         
+        
+        return node.raptConfig.get(url,opts).then(function(result) {
+            var res = result.body;
+            node.warn(res);
+            return res;
+        }).catch(function(err) {
+            node.error(err);
+        })
+    }
+    
+    RaptPullNode.prototype.GetTelemetry = function(hydrometerId) {
+        var node = this;
+        node.warn("hydrometerId provided: "+hydrometerId);
+
+        let url = "https://api.rapt.io/api/Hydrometers/GetTelemetry";
+        let opts = {hydrometerId: hydrometerId};
+        
+        
+        return node.raptConfig.get(url,opts).then(function(result) {
+            var res = result.body;
+            node.warn(res);
+            return res;
+        }).catch(function(err) {
+            node.error(err);
+        })
+    }
+    
+    RaptPullNode.prototype.getEndpoint = function(endpoint, opts) {
+        var node = this;
+        node.warn("opts provided: "+opts);
+
+        let url = "https://api.rapt.io/api/Hydrometers/"+endpoint;
         
         return node.raptConfig.get(url,opts).then(function(result) {
             var res = result.body;
