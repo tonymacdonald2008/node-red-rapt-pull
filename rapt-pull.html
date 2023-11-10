@@ -45,16 +45,18 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('rapt-pull',{
-        category: 'function',
+        category: 'network',
         color: '#a6bbcf',
         defaults: {
             rapt: {type:"rapt-credentials",required:true},
             name: {value:""},
-            endpoint: {value:"GetHydrometers"}
+            endpoint: {value:"GetHydrometers"},
+            topic: {value:""},
+            split: {value:false}
         },
         inputs: 1,
         outputs: 1,
-        icon: "file.svg",
+        icon: "font-awesome/fa-cloud-download",
         label: function() {
             return this.name||this.endpoint||"rapt-pull";
         }
@@ -77,6 +79,14 @@
             <option value="GetHydrometer">GetHydrometer</option>
             <option value="GetTelemetry">GetTelemetry</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tag"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic for output">
+    </div>
+    <div class="form-row">
+        <label for="node-input-split"><i class="fa fa-tag"></i> Split array</label>
+        <input type="checkbox" id="node-input-split" placeholder="Split array into separate objects">
     </div>
 </script>
 
