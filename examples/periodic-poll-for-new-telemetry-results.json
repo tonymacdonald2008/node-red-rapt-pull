@@ -1,0 +1,163 @@
+[
+    {
+        "id": "6e0d669da7c138be",
+        "type": "tab",
+        "label": "Periodic poll for new telemetry results",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "dd6039a03faaf985",
+        "type": "inject",
+        "z": "6e0d669da7c138be",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "d242ff28f6ae7e46"
+            ]
+        ]
+    },
+    {
+        "id": "d242ff28f6ae7e46",
+        "type": "rapt-pull",
+        "z": "6e0d669da7c138be",
+        "account": "",
+        "name": "",
+        "endpoint": "GetHydrometers",
+        "topic": "",
+        "split": false,
+        "x": 360,
+        "y": 280,
+        "wires": [
+            [
+                "50fa3f82640b7e95",
+                "6ca1cdc2a186bac0"
+            ]
+        ]
+    },
+    {
+        "id": "50fa3f82640b7e95",
+        "type": "debug",
+        "z": "6e0d669da7c138be",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 340,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "6ca1cdc2a186bac0",
+        "type": "rapt-pull",
+        "z": "6e0d669da7c138be",
+        "account": "",
+        "name": "",
+        "endpoint": "GetTelemetry",
+        "topic": "RaptPillTelemetry",
+        "split": true,
+        "x": 610,
+        "y": 280,
+        "wires": [
+            [
+                "372ee63bdf5b7fbe",
+                "c5ce8a8218687b79"
+            ]
+        ]
+    },
+    {
+        "id": "372ee63bdf5b7fbe",
+        "type": "debug",
+        "z": "6e0d669da7c138be",
+        "name": "debug 15",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "c5ce8a8218687b79",
+        "type": "mqtt out",
+        "z": "6e0d669da7c138be",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "",
+        "x": 790,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "9ed3fb813b6adc09",
+        "type": "comment",
+        "z": "6e0d669da7c138be",
+        "name": "Set inject to repeat hourly",
+        "info": "",
+        "x": 170,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "78f0ab7033ba90bb",
+        "type": "comment",
+        "z": "6e0d669da7c138be",
+        "name": "startDate for query defaults to the last time query was sent or the current time for the first query",
+        "info": "",
+        "x": 860,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "34a3d31da66618f9",
+        "type": "comment",
+        "z": "6e0d669da7c138be",
+        "name": "end date for query defaults to current time",
+        "info": "",
+        "x": 700,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "972c1db6e3e0daf0",
+        "type": "comment",
+        "z": "6e0d669da7c138be",
+        "name": "Gets the telemetry information since the last time this query was sent.",
+        "info": "",
+        "x": 310,
+        "y": 80,
+        "wires": []
+    }
+]

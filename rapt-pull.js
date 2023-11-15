@@ -89,7 +89,7 @@ module.exports = function(RED) {
                 node.token = resobject.access_token;
                 return node.token;
             } else {
-                throw new error("failed to get a token: " + res);
+                throw new Error("failed to get a token: " + res);
             }
 
         }).catch(function(err) {
@@ -101,52 +101,66 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,config);
         var node = this;
         /* node.warn(config); */
-        node.rapt = config.rapt;
+        node.account = config.account;
         node.name = config.name;
         node.endpoint = config.endpoint;
-        node.topic = config.topic||"RAPT-"+node.endpoint;
+        node.topic = config.topic;
         node.split = config.split;
-        node.raptConfig = RED.nodes.getNode(node.rapt);
+        node.raptConfig = RED.nodes.getNode(node.account);
         
         var opts = {};
 
         node.on('input', function(msg) {
-            
+            let endpoint = msg?.endpoint || node.endpoint;
+            let topic = msg?.settopic || node.topic || endpoint;
+            let split = msg?.split;
+            /* need to allow for override of true configuration of split*/
+            if (split === undefined){
+                split = config.split;
+            }
+            let start = msg?.start || node.lastend || Date.now() ;
+            let startDate = new Date(start);
+            let end = msg?.end || Date.now();
+            let endDate = new Date(end);
             let payload = msg.payload;
             if (!Array.isArray(payload)){
                 payload = [payload];
             }
             payload.forEach(function (element) {
                 opts = {};
-                switch (node.endpoint){
-                    case 'GetTelemetry':
-                        let start = new Date();
-                        start.setHours(0);
-                        opts.startDate = start.toISOString();
-                        let end = new Date();
-                        opts.endDate = end.toISOString();
-                    case 'GetHydrometer':
+                switch (endpoint.toLowerCase()){
+                    case 'gettelemetry':
+                        opts.startDate = startDate.toISOString();
+                        opts.endDate = endDate.toISOString();
+                    case 'gethydrometer':
                         opts.hydrometerId = element.id;
                         break;
+                    case 'gethydrometers':
+                        /* no parms for this one*/
+                        break;
                     default:
-                    /* nothing to do */
+                    /* unsupported endpoint */
+                    throw new Error("unsupported endpoint: " + endpoint);
                 }
                 node.warn(opts);
                 node.raptConfig.authorise()
-                .then(() =>node.getEndpoint(node.endpoint,opts))
+                .then(() =>node.getEndpoint(endpoint,opts))
                 .then((result) => {
-                    if(Array.isArray(result)&&node.split){
+                    if(Array.isArray(result)&&split){
                         result.forEach(function (element) {
                             const newmsg = {};
-                            newmsg.topic = node.topic;
+                            newmsg.topic = topic;
                             newmsg.payload = element;
                             node.send(newmsg);
                         });
                     } else {
                         const newmsg = {};
-                        newmsg.topic = node.topic;
+                        newmsg.topic = topic;
                         newmsg.payload = result;
                         node.send(newmsg);
+                    }
+                    if (endpoint.toLowerCase() == 'gettelemetry') {
+                        node.lastend = endDate.getTime();
                     }
                     return null;
                 });

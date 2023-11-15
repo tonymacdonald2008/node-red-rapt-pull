@@ -1,0 +1,159 @@
+[
+    {
+        "id": "eb989d567c69c5f0",
+        "type": "tab",
+        "label": "Get telemetry for a specific time period",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "354f52bb48033445",
+        "type": "inject",
+        "z": "eb989d567c69c5f0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 160,
+        "wires": [
+            [
+                "19e4de2454088587"
+            ]
+        ]
+    },
+    {
+        "id": "19e4de2454088587",
+        "type": "rapt-pull",
+        "z": "eb989d567c69c5f0",
+        "account": "",
+        "name": "",
+        "endpoint": "GetHydrometers",
+        "topic": "",
+        "split": false,
+        "x": 300,
+        "y": 160,
+        "wires": [
+            [
+                "5f6e76be8be36bfd"
+            ]
+        ]
+    },
+    {
+        "id": "81c8dd907ccba4ee",
+        "type": "debug",
+        "z": "eb989d567c69c5f0",
+        "name": "debug 24",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "bb755b361e289451",
+        "type": "comment",
+        "z": "eb989d567c69c5f0",
+        "name": "get telemetry for specific time period",
+        "info": "",
+        "x": 200,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "5f6e76be8be36bfd",
+        "type": "change",
+        "z": "eb989d567c69c5f0",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "start",
+                "pt": "msg",
+                "to": "1699985818178",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "end",
+                "pt": "msg",
+                "to": "1699992992278",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 500,
+        "y": 160,
+        "wires": [
+            [
+                "45b815af313de6d6"
+            ]
+        ]
+    },
+    {
+        "id": "45b815af313de6d6",
+        "type": "rapt-pull",
+        "z": "eb989d567c69c5f0",
+        "account": "",
+        "name": "",
+        "endpoint": "GetTelemetry",
+        "topic": "RaptPillTelemetry",
+        "split": true,
+        "x": 690,
+        "y": 160,
+        "wires": [
+            [
+                "81c8dd907ccba4ee",
+                "4074ece7291909a4"
+            ]
+        ]
+    },
+    {
+        "id": "4074ece7291909a4",
+        "type": "mqtt out",
+        "z": "eb989d567c69c5f0",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "",
+        "x": 850,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "8b62be91c6c869cd",
+        "type": "comment",
+        "z": "eb989d567c69c5f0",
+        "name": "Set start and end properties",
+        "info": "",
+        "x": 540,
+        "y": 100,
+        "wires": []
+    }
+]

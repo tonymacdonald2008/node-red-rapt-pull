@@ -1,7 +1,7 @@
 <script type="text/html" data-template-name="rapt-credentials">
     <div class="form-row">
         <label style="margin-left: 20px;" for="node-config-input-user_name"><span >user name</span></label>
-        <input type="text" id="node-config-input-user_name">
+        <input type="text" id="node-config-input-user_name" placeholder="email used to register on api.rapt.io">
     </div>
     <div class="form-row">
         <label style="margin-left: 20px;" for="node-config-input-api_secret"><span >secret</span></label>
@@ -43,12 +43,28 @@
 })();
 </script>
 
+<script type="text/markdown" data-help-name="rapt-credentials">
+Credentials for accessing the RAPT API
+### User Name
+The email address that you used to register with RAPT portal.</p>
+### API Secret</p>
+The API secret gives access to the RAPT API and must be created on the RAPT portal https://api.rapt.io
+```
+To create an API secret on the RAPT portal, navigate to MyAccount and then to Api Secrets.
+Clicking on the plus sign at the top of the screen brings up a dialog box.
+You will need to give the secret a name e.g. MyNodeRedIntegration
+Clicking "SAVE" will update the dialog to show the newly created secret. The secret is also copied to the clipboard.
+```
+This is the value that you will need to paste into the API Secret field in the rapt-credentials configuration node.
+You may also want to save this in a safe place since you will not be able to view this information later.
+</script>
+
 <script type="text/javascript">
     RED.nodes.registerType('rapt-pull',{
         category: 'network',
         color: '#a6bbcf',
         defaults: {
-            rapt: {type:"rapt-credentials",required:true},
+            account: {type:"rapt-credentials",required:true},
             name: {value:""},
             endpoint: {value:"GetHydrometers"},
             topic: {value:""},
@@ -65,8 +81,8 @@
 
 <script type="text/html" data-template-name="rapt-pull">
     <div class="form-row">
-        <label for="node-input-rapt"> <span >credentials</span></label>
-        <input type="text" id="node-input-rapt">
+        <label for="node-input-account"> <span >credentials</span></label>
+        <input type="text" id="node-input-account">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -90,10 +106,54 @@
     </div>
 </script>
 
-<script type="text/html" data-help-name="rapt-pull">
-    <p>A simple node that pulls information from the RAPT cloud (api.rapt.io) for a PILL digital hydrometer</p>
-    <p>Three endpoints in the Hydrometers section of the RAPT API (v1) are supported</p>
-    <p>/api​/Hydrometers​/GetHydrometers</p>
-    <p>/api​/Hydrometers​/GetHydrometer</p>
-    <p>/api​/Hydrometers​/GetTelemetry</p>
+<script type="text/markdown" data-help-name="rapt-pull">
+A simple node that pulls information from the RAPT cloud (api.rapt.io) using the RAPT API (v1) for a PILL digital hydrometer.  
+The following endpoints are supported
+```
+/api​/Hydrometers​/GetHydrometers
+/api​/Hydrometers​/GetHydrometer
+/api​/Hydrometers​/GetTelemetry
+```
+### Inputs
+: endpoint (string) : The API endpoint to access, one of "GetHydrometers", "GetHydrometer", "GetTelemetry".
+: settopic (string) : The topic to be used in the outgoing message or messages.
+: payload (object | array | number) : Used to extract `hyrometerId` for `GetHydrometer` and `GetTelemetry` endpoints. Ignored for `GetHydrometers` endpoint.
+: split (boolean) : If `split` is `true` and reponse contains an array, send a separate message for each array element.
+: start (ISO date string) : Only used for "GetTelemetry" endpoint.
+
+### Config Items
+: rapt-credentials (config item) : Configuration of credentials to access RAPT API
+: endpoint (selection) : Select one of `GetHydrometers`, `GetHydrometer`, `GetTelemetry` Default is `GetHydrometers`
+: topic (string) : The topic to be used in the outgoing message or messages.
+: split (checkbox) : If checked and reponse contains an array, send a separate message for each array element.
+
+### Outputs
+`msg.payload` contains the result of the API request. If result contains an array and `msg.split` is true or the `split` configuration option is set, a separate message is sent for each array element.
+
+`msg.topic` is set according to the following precedence:
+1. `msg.settopic` input
+2. `topic` configuration value
+3. `msg.endpoint` input
+4. `endpoint` configuration value
+
+### Details
+#### Credentials
+You must provide credentials to access the RAPT API.
+These are configured in the rapt-credentials config node that is accessed through the credentials configuration item of the rapt-pull node.
+
+#### Behaviour
+`endpoint`, `topic` and `split` can be provided as properties of the incomming message or specified when configuring the node. Properties provided in the incomming message override configuration values.
+
+`msg.endpoint` is case insensitive. If msg.endpoint is present but does not match a supported endpoint it is treated as an error.
+
+`msg.payload` is ignored in the case where the endpoint is `GetHydrometers`.
+
+`msg.payload` is used to determine the `hydrometerid` parameter of the API request for `GetHydrometer` or `GetTelemetry`.
+
+`msg.payload` is expected to contain an object or an array of objects.  
+If `msg.payload` contains an array, the array is split and each array element is treated as a separate request.  
+If `msg.payload` contains an object, the id property of the object is used as the `hydrometerid` parameter of the API request.  
+If no `id` property is defined, this is treated as an error.
+
+This behaviour allows the output of a `GetHydrometers` request to be chained as input to `GetHydrometer` or `GetTelemetry` requests.
 </script>
