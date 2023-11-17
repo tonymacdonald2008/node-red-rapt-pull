@@ -115,11 +115,9 @@ The following endpoints are supported
 /api​/Hydrometers​/GetTelemetry
 ```
 ### Inputs
-: endpoint (string) : The API endpoint to access, one of "GetHydrometers", "GetHydrometer", "GetTelemetry".
-: settopic (string) : The topic to be used in the outgoing message or messages.
 : payload (object | array | number) : Used to extract `hyrometerId` for `GetHydrometer` and `GetTelemetry` endpoints. Ignored for `GetHydrometers` endpoint.
-: split (boolean) : If `split` is `true` and reponse contains an array, send a separate message for each array element.
-: start (ISO date string) : Only used for "GetTelemetry" endpoint.
+: start (ISO date string | timestamp) : Only used for "GetTelemetry" endpoint to populate the startDate query parameter of the API request.
+: end (ISO date string | timestamp) : Only used for "GetTelemetry" endpoint to populate the endDate query parameter of the API request.
 
 ### Config Items
 : rapt-credentials (config item) : Configuration of credentials to access RAPT API
@@ -128,13 +126,11 @@ The following endpoints are supported
 : split (checkbox) : If checked and reponse contains an array, send a separate message for each array element.
 
 ### Outputs
-`msg.payload` contains the result of the API request. If result contains an array and `msg.split` is true or the `split` configuration option is set, a separate message is sent for each array element.
+`msg.payload` contains the result of the API request. For `GetTelemetry` results if the `split` configuration option is set, a separate message is sent for each array element.
 
 `msg.topic` is set according to the following precedence:
-1. `msg.settopic` input
-2. `topic` configuration value
-3. `msg.endpoint` input
-4. `endpoint` configuration value
+1. `topic` configuration value
+2. `endpoint` configuration value
 
 ### Details
 #### Credentials
@@ -142,13 +138,9 @@ You must provide credentials to access the RAPT API.
 These are configured in the rapt-credentials config node that is accessed through the credentials configuration item of the rapt-pull node.
 
 #### Behaviour
-`endpoint`, `topic` and `split` can be provided as properties of the incomming message or specified when configuring the node. Properties provided in the incomming message override configuration values.
-
-`msg.endpoint` is case insensitive. If msg.endpoint is present but does not match a supported endpoint it is treated as an error.
-
 `msg.payload` is ignored in the case where the endpoint is `GetHydrometers`.
 
-`msg.payload` is used to determine the `hydrometerid` parameter of the API request for `GetHydrometer` or `GetTelemetry`.
+`msg.payload` is used to determine the `hydrometerId` parameter of the API request for `GetHydrometer` or `GetTelemetry`.
 
 `msg.payload` is expected to contain an object or an array of objects.  
 If `msg.payload` contains an array, the array is split and each array element is treated as a separate request.  

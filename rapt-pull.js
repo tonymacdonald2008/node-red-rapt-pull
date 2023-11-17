@@ -100,7 +100,7 @@ module.exports = function(RED) {
     function RaptPullNode(config) {
         RED.nodes.createNode(this,config);
         var node = this;
-        /* node.warn(config); */
+        node.warn(config);
         node.account = config.account;
         node.name = config.name;
         node.endpoint = config.endpoint;
@@ -111,17 +111,17 @@ module.exports = function(RED) {
         var opts = {};
 
         node.on('input', function(msg) {
-            let endpoint = msg?.endpoint || node.endpoint;
-            let topic = msg?.settopic || node.topic || endpoint;
-            let split = msg?.split;
-            /* need to allow for override of true configuration of split*/
-            if (split === undefined){
-                split = config.split;
+            let endpoint = node.endpoint;
+            let topic = node.topic || endpoint;
+            let split = node.split;
+            if (endpoint.toLowerCase() == 'gettelemetry'){
+                let start = msg?.start || node.lastend || Date.now() ;
+                var startDate = new Date(start);
+                let end = msg?.end || Date.now();
+                var endDate = new Date(end);
+                node.lastend = endDate.getTime();
             }
-            let start = msg?.start || node.lastend || Date.now() ;
-            let startDate = new Date(start);
-            let end = msg?.end || Date.now();
-            let endDate = new Date(end);
+            
             let payload = msg.payload;
             if (!Array.isArray(payload)){
                 payload = [payload];
@@ -158,9 +158,6 @@ module.exports = function(RED) {
                         newmsg.topic = topic;
                         newmsg.payload = result;
                         node.send(newmsg);
-                    }
-                    if (endpoint.toLowerCase() == 'gettelemetry') {
-                        node.lastend = endDate.getTime();
                     }
                     return null;
                 });
