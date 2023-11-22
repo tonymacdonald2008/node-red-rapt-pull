@@ -75,6 +75,24 @@ You may also want to save this in a safe place since you will not be able to vie
         icon: "font-awesome/fa-cloud-download",
         label: function() {
             return this.name||this.endpoint||"rapt-pull";
+        },
+        oneditprepare: function() {
+            let hidesplit = ("GetTelemetry" != this.endpoint);
+            if (hidesplit){
+                $('#node-input-split, label[for="node-input-split"]').hide();
+                $('#node-input-split').prop('checked', false);
+            }
+            $("#node-input-endpoint").on("change", function (){
+                
+                let hidesplit = "GetTelemetry"!=$(this).val();
+                if (hidesplit){
+                    $('#node-input-split, label[for="node-input-split"]').hide();
+                    $('#node-input-split').prop('checked', false);
+                } else {
+                    $('#node-input-split, label[for="node-input-split"]').show();
+                }
+            });
+
         }
     });
 </script>
@@ -101,29 +119,31 @@ You may also want to save this in a safe place since you will not be able to vie
         <input type="text" id="node-input-topic" placeholder="Topic for output">
     </div>
     <div class="form-row">
-        <label for="node-input-split"><i class="fa fa-tag"></i> Split array</label>
-        <input type="checkbox" id="node-input-split" placeholder="Split array into separate objects">
+        <label for="node-input-split"><i class="fa fa-tag"></i> Split</label>
+        <input type="checkbox" id="node-input-split" >
     </div>
 </script>
 
 <script type="text/markdown" data-help-name="rapt-pull">
-A simple node that pulls information from the RAPT cloud (api.rapt.io) using the RAPT API (v1) for a PILL digital hydrometer.  
-The following endpoints are supported
+A simple node that pulls information for one or more RAPT PILL digital hydrometers from the RAPT cloud (api.rapt.io) using the RAPT API (v1).
+
+The following API endpoints are supported:
 ```
 /api​/Hydrometers​/GetHydrometers
 /api​/Hydrometers​/GetHydrometer
 /api​/Hydrometers​/GetTelemetry
 ```
-### Inputs
-: payload (object | array | number) : Used to extract `hyrometerId` for `GetHydrometer` and `GetTelemetry` endpoints. Ignored for `GetHydrometers` endpoint.
-: start (ISO date string | timestamp) : Only used for "GetTelemetry" endpoint to populate the startDate query parameter of the API request.
-: end (ISO date string | timestamp) : Only used for "GetTelemetry" endpoint to populate the endDate query parameter of the API request.
 
 ### Config Items
 : rapt-credentials (config item) : Configuration of credentials to access RAPT API
 : endpoint (selection) : Select one of `GetHydrometers`, `GetHydrometer`, `GetTelemetry` Default is `GetHydrometers`
 : topic (string) : The topic to be used in the outgoing message or messages.
-: split (checkbox) : If checked and reponse contains an array, send a separate message for each array element.
+: split (checkbox) : Only available if endpoint is `GetTelemetry`. If checked, send a separate message for each element of the response array.
+
+### Inputs
+: payload (object | array | number) : Used to extract `hyrometerId` for `GetHydrometer` and `GetTelemetry` endpoints. Ignored for `GetHydrometers` endpoint.
+: start (ISO date string | timestamp) : Only used for "GetTelemetry" endpoint to populate the startDate query parameter of the API request.
+: end (ISO date string | timestamp) : Only used for "GetTelemetry" endpoint to populate the endDate query parameter of the API request.
 
 ### Outputs
 `msg.payload` contains the result of the API request. For `GetTelemetry` results if the `split` configuration option is set, a separate message is sent for each array element.
@@ -140,12 +160,14 @@ These are configured in the rapt-credentials config node that is accessed throug
 #### Behaviour
 `msg.payload` is ignored in the case where the endpoint is `GetHydrometers`.
 
-`msg.payload` is used to determine the `hydrometerId` parameter of the API request for `GetHydrometer` or `GetTelemetry`.
+`msg.payload` is used to determine the `hydrometerId` parameter of the API request in the cases where the endpoint is `GetHydrometer` or `GetTelemetry`.
 
-`msg.payload` is expected to contain an object or an array of objects.  
-If `msg.payload` contains an array, the array is split and each array element is treated as a separate request.  
+`msg.payload` is expected to contain an object or an array of objects.
+
 If `msg.payload` contains an object, the id property of the object is used as the `hydrometerid` parameter of the API request.  
 If no `id` property is defined, this is treated as an error.
+
+If `msg.payload` contains an array, the array is split and each array element is treated as a separate request.  
 
 This behaviour allows the output of a `GetHydrometers` request to be chained as input to `GetHydrometer` or `GetTelemetry` requests.
 </script>
