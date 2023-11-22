@@ -6,10 +6,18 @@ It pushes its telemetry data to the RAPT cloud via wifi or indirectly via blue-t
 
 This node-red integration project uses the RAPT API v1 to request device or telemetry information from the RAPT cloud so that it can be integrated into a Node-RED flow.
 
-Currently the following endpoints are supported 
+Currently the following API endpoints are supported 
 
 ```
 /api​/Hydrometers​/GetHydrometers
 /api​/Hydrometers​/GetHydrometer
 /api​/Hydrometers​/GetTelemetry
 ```
+Each instance of the rapt-pull node is configured to invoke one of the supported endpoints.
+
+When configured for GetHydrometers, it will return an array objects contantaining details for all hydrometers configured against your RAPT account.  
+When configured for GetHydrometer, it will return an object containing details about a single hydrometer.  
+When configured for GetTelemetry, it will return an array of objects conataining telemetry information for a specific time period.  
+
+By chaining node instances together it is very easy to create a flows to get exactly the information you would like.
+For expample
