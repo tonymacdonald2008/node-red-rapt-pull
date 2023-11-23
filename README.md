@@ -22,3 +22,6 @@ When configured for GetTelemetry, it will return an array of objects containing 
 By chaining node instances together it is very easy to create a flows to get exactly the information you would like.
 
 For expample, to get all new telemetry information hourly, you could wire an inject node set to repeat every hour into a rapt-pull node configured for GetHydrometers and wire its output to another rapt pull node configured for GetTelemetry as shown in the example below. In this configuration, the node configured for GetTelemetry will retreive the Telemetry data for the period since it was last invoked.
+
+# Example
+![example](./readme/example1.png?raw=true)
