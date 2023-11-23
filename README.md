@@ -30,4 +30,4 @@ Alternatively, you could get telemetry information for a specific time period by
 ![example](./readme/example2.png?raw=true)
 
 
-The example flows above are included in the node-red-rapt-pull package and available for input into your node red instance.
+The example flows above are included in the node-red-rapt-pull package and available for import into your node red instance.
