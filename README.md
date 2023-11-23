@@ -15,13 +15,13 @@ Currently the following API endpoints are supported
 ```
 Each instance of the rapt-pull node is configured to invoke one of the supported endpoints.
 
-When configured for GetHydrometers, it will return an array objects contantaining details for all hydrometers configured against your RAPT account.  
+When configured for GetHydrometers, it will return an array of objects contantaining details for all hydrometers registered against your RAPT account.  
 When configured for GetHydrometer, it will return an object containing details about a single hydrometer.  
 When configured for GetTelemetry, it will return an array of objects containing telemetry information for a specific time period.  
 
 By chaining node instances together it is very easy to create a flows to get exactly the information you would like.
 
-For expample, to get all new telemetry information hourly, you could wire an inject node set to repeat every hour into a rapt-pull node configured for GetHydrometers and wire its output to another rapt pull node configured for GetTelemetry as shown in the example below. In this configuration, the node configured for GetTelemetry will retreive the Telemetry data for the period since it was last invoked.
+For expample, to get all new telemetry information hourly, you could wire an inject node, set to repeat every hour, into a rapt-pull node configured for GetHydrometers. Then wire its output to another rapt pull node configured for GetTelemetry as shown in the example below. In this configuration, the node configured for GetTelemetry will retreive the Telemetry data for the period since it was last invoked.
 
 ![example](./readme/example1.png?raw=true)
 
