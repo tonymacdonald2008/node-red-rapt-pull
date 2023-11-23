@@ -34,7 +34,7 @@
     }
   },
   "author": "Tony MacDonald",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/tonymacdonald2008/node-red-rapt-pull/issues"
   },
