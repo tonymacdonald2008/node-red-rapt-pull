@@ -100,7 +100,7 @@ module.exports = function(RED) {
     function RaptPullNode(config) {
         RED.nodes.createNode(this,config);
         var node = this;
-        node.warn(config);
+
         node.account = config.account;
         node.name = config.name;
         node.endpoint = config.endpoint;
@@ -142,7 +142,7 @@ module.exports = function(RED) {
                     /* unsupported endpoint */
                     throw new Error("unsupported endpoint: " + endpoint);
                 }
-                node.warn(opts);
+
                 node.raptConfig.authorise()
                 .then(() =>node.getEndpoint(endpoint,opts))
                 .then((result) => {

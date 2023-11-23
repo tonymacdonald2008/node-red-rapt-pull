@@ -2,7 +2,7 @@
     {
         "id": "6e0d669da7c138be",
         "type": "tab",
-        "label": "Periodic poll for new telemetry results",
+        "label": "Periodic poll for new telemetry data",
         "disabled": false,
         "info": "",
         "env": []
@@ -25,7 +25,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 150,
-        "y": 280,
+        "y": 220,
         "wires": [
             [
                 "d242ff28f6ae7e46"
@@ -41,8 +41,8 @@
         "endpoint": "GetHydrometers",
         "topic": "",
         "split": false,
-        "x": 360,
-        "y": 280,
+        "x": 340,
+        "y": 220,
         "wires": [
             [
                 "50fa3f82640b7e95",
@@ -63,8 +63,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 340,
-        "y": 340,
+        "x": 320,
+        "y": 280,
         "wires": []
     },
     {
@@ -76,8 +76,8 @@
         "endpoint": "GetTelemetry",
         "topic": "RaptPillTelemetry",
         "split": true,
-        "x": 610,
-        "y": 280,
+        "x": 550,
+        "y": 220,
         "wires": [
             [
                 "372ee63bdf5b7fbe",
@@ -98,8 +98,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 620,
-        "y": 340,
+        "x": 560,
+        "y": 280,
         "wires": []
     },
     {
@@ -116,8 +116,8 @@
         "correl": "",
         "expiry": "",
         "broker": "",
-        "x": 790,
-        "y": 280,
+        "x": 730,
+        "y": 220,
         "wires": []
     },
     {
@@ -127,37 +127,47 @@
         "name": "Set inject to repeat hourly",
         "info": "",
         "x": 170,
-        "y": 220,
+        "y": 160,
         "wires": []
     },
     {
         "id": "78f0ab7033ba90bb",
         "type": "comment",
         "z": "6e0d669da7c138be",
-        "name": "startDate for query defaults to the last time query was sent or the current time for the first query",
+        "name": "startDate for API request - defaults to the last time this node was triggered or the current time",
         "info": "",
-        "x": 860,
-        "y": 200,
+        "x": 800,
+        "y": 140,
         "wires": []
     },
     {
         "id": "34a3d31da66618f9",
         "type": "comment",
         "z": "6e0d669da7c138be",
-        "name": "end date for query defaults to current time",
+        "name": "endDate for API request - defaults to current time",
         "info": "",
-        "x": 700,
-        "y": 240,
+        "x": 660,
+        "y": 180,
         "wires": []
     },
     {
         "id": "972c1db6e3e0daf0",
         "type": "comment",
         "z": "6e0d669da7c138be",
-        "name": "Gets the telemetry information since the last time this query was sent.",
+        "name": "Gets telemetry data since the node was last triggered",
         "info": "",
-        "x": 310,
-        "y": 80,
+        "x": 680,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "794308d76363e214",
+        "type": "comment",
+        "z": "6e0d669da7c138be",
+        "name": "Periodically poll for new telemetry data",
+        "info": "",
+        "x": 210,
+        "y": 100,
         "wires": []
     }
 ]
