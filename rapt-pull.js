@@ -134,6 +134,9 @@ module.exports = function(RED) {
                         opts.endDate = endDate.toISOString();
                     case 'gethydrometer':
                         opts.hydrometerId = element.id;
+                        if (undefined == opts.hydrometerId){ 
+                            throw new Error("no hydrometerId found");
+                        }
                         break;
                     case 'gethydrometers':
                         /* no parms for this one*/

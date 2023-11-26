@@ -1,8 +1,8 @@
 # node-red-rapt-pull
-Simple node to pull data from RAPT cloud for integration into node red flows.
+Simple node to pull data from RAPT cloud for integration into Node-RED flows.
 
 RAPT Pill is a floating digital hydrometer and thermometer produced by KegLand.
-It pushes its telemetry data to the RAPT cloud via WiFi or indirectly via Bluetooth through a compatible KegLand device.
+It pushes periodic telemetry data to the RAPT cloud via WiFi or indirectly via Bluetooth through a compatible KegLand device.
 
 The rapt-pull node uses the RAPT API v1 to request device or telemetry information from the RAPT cloud so that it can be integrated into a Node-RED flow.
 
