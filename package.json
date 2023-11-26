@@ -1,6 +1,6 @@
 {
-  "name": "@tonymacdonald/node-red-rapt-integration",
-  "version": "0.0.1",
+  "name": "@tonymacdonald/node-red-rapt-pull",
+  "version": "0.9.0",
   "description": "Simple node to pull data from RAPT cloud for integration into node red flows",
   "dependencies": {
     "request": "^2.88.2"
@@ -10,17 +10,19 @@
     "node-red": "^3.0.2",
     "node-red-node-test-helper": "^0.3.2"
   },
-  "main": "rapt-poll.js",
+  "main": "",
   "scripts": {
     "test": "mocha \"test/**/*_spec.js\""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tonymacdonald2008/node-red-rapt-integration.git"
+    "url": "git+https://github.com/tonymacdonald2008/node-red-rapt-pull.git"
   },
   "keywords": [
     "node-red",
-    "rapt"
+    "rapt",
+    "pill",
+    "hydrometer"
   ],
   "engines": {
     "node": ">=12.0.0"
@@ -32,9 +34,9 @@
     }
   },
   "author": "Tony MacDonald",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tonymacdonald2008/node-red-rapt-integration/issues"
+    "url": "https://github.com/tonymacdonald2008/node-red-rapt-pull/issues"
   },
-  "homepage": "https://github.com/tonymacdonald2008/node-red-rapt-integration#readme"
+  "homepage": "https://github.com/tonymacdonald2008/node-red-rapt-pull#readme"
 }

@@ -62,17 +62,17 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 860,
-        "y": 240,
+        "x": 840,
+        "y": 220,
         "wires": []
     },
     {
         "id": "bb755b361e289451",
         "type": "comment",
         "z": "eb989d567c69c5f0",
-        "name": "get telemetry for specific time period",
+        "name": "Get telemetry for specific time period",
         "info": "",
-        "x": 200,
+        "x": 180,
         "y": 60,
         "wires": []
     },
@@ -80,21 +80,21 @@
         "id": "5f6e76be8be36bfd",
         "type": "change",
         "z": "eb989d567c69c5f0",
-        "name": "",
+        "name": "Set start and end message properties",
         "rules": [
             {
                 "t": "set",
                 "p": "start",
                 "pt": "msg",
-                "to": "1699985818178",
+                "to": "1700606554730",
                 "tot": "num"
             },
             {
                 "t": "set",
                 "p": "end",
                 "pt": "msg",
-                "to": "1699992992278",
-                "tot": "num"
+                "to": "2023-11-22T00:15:46.477Z",
+                "tot": "str"
             }
         ],
         "action": "",
@@ -102,7 +102,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 500,
+        "x": 570,
         "y": 160,
         "wires": [
             [
@@ -119,7 +119,7 @@
         "endpoint": "GetTelemetry",
         "topic": "RaptPillTelemetry",
         "split": true,
-        "x": 690,
+        "x": 830,
         "y": 160,
         "wires": [
             [
@@ -142,7 +142,7 @@
         "correl": "",
         "expiry": "",
         "broker": "",
-        "x": 850,
+        "x": 1010,
         "y": 160,
         "wires": []
     },
@@ -150,9 +150,19 @@
         "id": "8b62be91c6c869cd",
         "type": "comment",
         "z": "eb989d567c69c5f0",
-        "name": "Set start and end properties",
+        "name": "msg.start is used to set the startDate parameter of the API request",
         "info": "",
-        "x": 540,
+        "x": 820,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "1ffd4b275bdf9267",
+        "type": "comment",
+        "z": "eb989d567c69c5f0",
+        "name": "msg.end is used to set the endDate parameter of the API request",
+        "info": "",
+        "x": 810,
         "y": 100,
         "wires": []
     }

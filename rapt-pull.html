@@ -46,15 +46,15 @@
 <script type="text/markdown" data-help-name="rapt-credentials">
 Credentials for accessing the RAPT API
 ### User Name
-The email address that you used to register with RAPT portal.</p>
+The email address that you used to register with RAPT portal</p>
 ### API Secret</p>
 The API secret gives access to the RAPT API and must be created on the RAPT portal https://api.rapt.io
-```
+
 To create an API secret on the RAPT portal, navigate to MyAccount and then to Api Secrets.
 Clicking on the plus sign at the top of the screen brings up a dialog box.
 You will need to give the secret a name e.g. MyNodeRedIntegration
 Clicking "SAVE" will update the dialog to show the newly created secret. The secret is also copied to the clipboard.
-```
+
 This is the value that you will need to paste into the API Secret field in the rapt-credentials configuration node.
 You may also want to save this in a safe place since you will not be able to view this information later.
 </script>
@@ -75,6 +75,24 @@ You may also want to save this in a safe place since you will not be able to vie
         icon: "font-awesome/fa-cloud-download",
         label: function() {
             return this.name||this.endpoint||"rapt-pull";
+        },
+        oneditprepare: function() {
+            let hidesplit = ("GetTelemetry" != this.endpoint);
+            if (hidesplit){
+                $('#node-input-split, label[for="node-input-split"]').hide();
+                $('#node-input-split').prop('checked', false);
+            }
+            $("#node-input-endpoint").on("change", function (){
+                
+                let hidesplit = "GetTelemetry"!=$(this).val();
+                if (hidesplit){
+                    $('#node-input-split, label[for="node-input-split"]').hide();
+                    $('#node-input-split').prop('checked', false);
+                } else {
+                    $('#node-input-split, label[for="node-input-split"]').show();
+                }
+            });
+
         }
     });
 </script>
@@ -101,40 +119,39 @@ You may also want to save this in a safe place since you will not be able to vie
         <input type="text" id="node-input-topic" placeholder="Topic for output">
     </div>
     <div class="form-row">
-        <label for="node-input-split"><i class="fa fa-tag"></i> Split array</label>
-        <input type="checkbox" id="node-input-split" placeholder="Split array into separate objects">
+        <label for="node-input-split"><i class="fa fa-tag"></i> Split</label>
+        <input type="checkbox" id="node-input-split" >
     </div>
 </script>
 
 <script type="text/markdown" data-help-name="rapt-pull">
-A simple node that pulls information from the RAPT cloud (api.rapt.io) using the RAPT API (v1) for a PILL digital hydrometer.  
-The following endpoints are supported
+A simple node that pulls information for one or more RAPT PILL digital hydrometers from the RAPT cloud (api.rapt.io) using the RAPT API (v1).
+
+The following API endpoints are supported:
 ```
 /api​/Hydrometers​/GetHydrometers
 /api​/Hydrometers​/GetHydrometer
 /api​/Hydrometers​/GetTelemetry
 ```
-### Inputs
-: endpoint (string) : The API endpoint to access, one of "GetHydrometers", "GetHydrometer", "GetTelemetry".
-: settopic (string) : The topic to be used in the outgoing message or messages.
-: payload (object | array | number) : Used to extract `hyrometerId` for `GetHydrometer` and `GetTelemetry` endpoints. Ignored for `GetHydrometers` endpoint.
-: split (boolean) : If `split` is `true` and reponse contains an array, send a separate message for each array element.
-: start (ISO date string) : Only used for "GetTelemetry" endpoint.
 
 ### Config Items
 : rapt-credentials (config item) : Configuration of credentials to access RAPT API
-: endpoint (selection) : Select one of `GetHydrometers`, `GetHydrometer`, `GetTelemetry` Default is `GetHydrometers`
+: endpoint (selection) : Select one of `GetHydrometers`, `GetHydrometer`, `GetTelemetry`. Default is `GetHydrometers`
 : topic (string) : The topic to be used in the outgoing message or messages.
-: split (checkbox) : If checked and reponse contains an array, send a separate message for each array element.
+: split (checkbox) : Only available if endpoint is `GetTelemetry`. If checked, send a separate message for each element of the response array.
+
+### Inputs
+: payload (object | array ) : Only used for `GetTelemetry` and `GetHydrometer` endpoints to populate the `hyrometerId` query parameter of the API request.  Ignored for `GetHydrometers` endpoint.
+: start (ISO date string | timestamp) : Only used for `GetTelemetry` endpoint to populate the `startDate` query parameter of the API request.
+: end (ISO date string | timestamp) : Only used for `GetTelemetry` endpoint to populate the `endDate` query parameter of the API request.
 
 ### Outputs
-`msg.payload` contains the result of the API request. If result contains an array and `msg.split` is true or the `split` configuration option is set, a separate message is sent for each array element.
+`msg.payload` contains the result of the API request.  
+If endpoint is `GetTelemetry` and the `split` configuration option is set, a separate message is sent for each element in the response array.
 
 `msg.topic` is set according to the following precedence:
-1. `msg.settopic` input
-2. `topic` configuration value
-3. `msg.endpoint` input
-4. `endpoint` configuration value
+1. `topic` configuration value
+2. `endpoint` configuration value
 
 ### Details
 #### Credentials
@@ -142,18 +159,16 @@ You must provide credentials to access the RAPT API.
 These are configured in the rapt-credentials config node that is accessed through the credentials configuration item of the rapt-pull node.
 
 #### Behaviour
-`endpoint`, `topic` and `split` can be provided as properties of the incomming message or specified when configuring the node. Properties provided in the incomming message override configuration values.
+`msg.payload` is ignored if the endpoint is `GetHydrometers`.
 
-`msg.endpoint` is case insensitive. If msg.endpoint is present but does not match a supported endpoint it is treated as an error.
+`msg.payload` is used to determine the `hydrometerId` query parameter of the API request if the endpoint is `GetHydrometer` or `GetTelemetry`.
 
-`msg.payload` is ignored in the case where the endpoint is `GetHydrometers`.
+`msg.payload` is expected to contain an object or an array of objects.
 
-`msg.payload` is used to determine the `hydrometerid` parameter of the API request for `GetHydrometer` or `GetTelemetry`.
-
-`msg.payload` is expected to contain an object or an array of objects.  
-If `msg.payload` contains an array, the array is split and each array element is treated as a separate request.  
-If `msg.payload` contains an object, the id property of the object is used as the `hydrometerid` parameter of the API request.  
+If `msg.payload` contains an object, the `id` property of the object is used as the `hydrometerId` query parameter of the API request.  
 If no `id` property is defined, this is treated as an error.
+
+If `msg.payload` contains an array, the array is split and each array element is treated as a separate request.  
 
 This behaviour allows the output of a `GetHydrometers` request to be chained as input to `GetHydrometer` or `GetTelemetry` requests.
 </script>
