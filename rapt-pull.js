@@ -135,7 +135,8 @@ module.exports = function(RED) {
                     case 'gethydrometer':
                         opts.hydrometerId = element.id;
                         if (undefined == opts.hydrometerId){ 
-                            throw new Error("no hydrometerId found");
+                            node.error("no hydrometerId found");
+                            return null;
                         }
                         break;
                     case 'gethydrometers':
