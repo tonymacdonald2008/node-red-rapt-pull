@@ -100,6 +100,7 @@ module.exports = function(RED) {
     function RaptPullNode(config) {
         RED.nodes.createNode(this,config);
         var node = this;
+        var nodeContext = this.context();
 
         node.account = config.account;
         node.name = config.name;
@@ -114,13 +115,7 @@ module.exports = function(RED) {
             let endpoint = node.endpoint;
             let topic = node.topic || endpoint;
             let split = node.split;
-            if (endpoint.toLowerCase() == 'gettelemetry'){
-                let start = msg?.start || node.lastend || Date.now() ;
-                var startDate = new Date(start);
-                let end = msg?.end || Date.now();
-                var endDate = new Date(end);
-                node.lastend = endDate.getTime();
-            }
+
             
             let payload = msg.payload;
             if (!Array.isArray(payload)){
@@ -130,8 +125,22 @@ module.exports = function(RED) {
                 opts = {};
                 switch (endpoint.toLowerCase()){
                     case 'gettelemetry':
+                        opts.hydrometerId = element.id;
+                        if (undefined == opts.hydrometerId){ 
+                            node.error("no hydrometerId found");
+                            return null;
+                        }
+                        // keep track of last time we requested telemetry for each hydrometer
+                        let lasttelemetryobj = nodeContext.get('lastTelemetry')||{};
+                        let lasttelemetry = lasttelemetryobj?.[opts.hydrometerId];
+                        let start = msg?.start || lasttelemetry || Date.now();
+                        let startDate = new Date(start);
+                        let end = msg?.end || Date.now();
+                        let endDate = new Date(end);
                         opts.startDate = startDate.toISOString();
                         opts.endDate = endDate.toISOString();
+                        lasttelemetryobj[opts.hydrometerId] = endDate.getTime();
+                        nodeContext.set('lastTelemetry',lasttelemetryobj);
                     case 'gethydrometer':
                         opts.hydrometerId = element.id;
                         if (undefined == opts.hydrometerId){ 
