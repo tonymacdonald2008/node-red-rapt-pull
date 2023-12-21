@@ -122,6 +122,7 @@ module.exports = function(RED) {
                 payload = [payload];
             }
             payload.forEach(function (element) {
+                node.status({fill:"blue",shape:"dot",text:"requesting"});
                 opts = {};
                 switch (endpoint.toLowerCase()){
                     case 'gettelemetry':
@@ -185,9 +186,10 @@ module.exports = function(RED) {
     RaptPullNode.prototype.getEndpoint = function(endpointurl, opts) {
         var node = this;
         let url = "https://api.rapt.io/api/Hydrometers/"+endpointurl;
-        
+        node.status({fill:"blue",shape:"dot",text:"requesting"});
         return node.raptConfig.get(url,opts).then(function(result) {
             var res = result.body;
+            node.status({});
             return res;
         }).catch(function(err) {
             node.error(err);
