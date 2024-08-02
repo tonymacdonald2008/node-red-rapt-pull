@@ -29,10 +29,26 @@ module.exports = function(RED) {
                 if (err) {
                     reject(err);
                 } else {
+                    if (response.headers['x-rate-limit-reset']){
+                        if (!node?.ratelimitreset){
+                            // suspect issues caused by clock skew between host and server setting reset to at least 1 minute from now
+                            node.ratelimitreset=Math.max(Date.parse(response.headers['x-rate-limit-reset']),(Date.now() + 60000));
+                        }else{
+                            if (Date.parse(response.headers['x-rate-limit-reset'])>parseInt(node.ratelimitreset)){
+                                // somehow we got a new reset value that is greater than the stored value
+                                // follow the same approach as above
+                                node.ratelimitreset=Math.max(Date.parse(response.headers['x-rate-limit-reset']),(Date.now() + 60000));
+                            }
+                        }
+                        if(response.headers['x-rate-limit-remaining']){
+                            node.ratelimitremaining=response.headers['x-rate-limit-remaining'];
+                        }
+                    }
+                    
                     resolve({
                         status: response.statusCode,
                         rateLimitRemaining: response.headers['x-rate-limit-remaining'],
-                        rateLimitTimeout: 5000+parseInt(response.headers['x-rate-limit-reset'])*1000 - Date.now(),
+                        rateLimitTimeout:  Date.parse(response.headers['x-rate-limit-reset']),
                         body: body
                     });
                 }
@@ -69,24 +85,28 @@ module.exports = function(RED) {
         })
     }
 
-    RaptCredentialsNode.prototype.authorise = function() {
+    RaptCredentialsNode.prototype.authorise = function(callingnode) {
         var node = this;
         
         if (node?.token){
             var token = node.token;
-            const token_expired = (token) => (Date.now() >= JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).exp * 1000);
+            const exp = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).exp;
+            //treat token as expired if it will expire in the next 30 seconds
+            const token_expired = ((Date.now() +30000) >= (exp * 1000));
             if (!token_expired){
-                 return new Promise((resolve) => token);
+                 return Promise.resolve(token);;
             }
         }
         let credentials = node.credentials;
         let url = "https://id.rapt.io/connect/token";
         var parms = { password: credentials.api_secret, username: credentials.user_name, client_id: "rapt-user", grant_type: "password" };
+        callingnode.status({fill:"blue",shape:"dot",text:"authorising"});
         return this.post(url,null,null,parms).then(function(result) {
             var res = result.body;
             var resobject = JSON.parse(res);
             if (resobject?.access_token) {
                 node.token = resobject.access_token;
+                callingnode.status({});
                 return node.token;
             } else {
                 throw new Error("failed to get a token: " + res);
@@ -95,6 +115,26 @@ module.exports = function(RED) {
         }).catch(function(err) {
             node.error(err);
         })
+    }
+    
+    RaptCredentialsNode.prototype.ratelimit = function(callingnode) {
+        var node = this;
+        if (node?.ratelimitreset){
+            var timeremaining = parseInt(node.ratelimitreset) - Date.now();
+            if (timeremaining > 0) {
+                if (node?.ratelimitremaining){
+                    if (node.ratelimitremaining < 1){
+                        callingnode.status({fill:"yellow",shape:"dot",text:"rate-limiting"});
+                        return new Promise((resolve) => setTimeout(resolve, timeremaining))
+                    }
+                }
+            }
+            else{
+                delete node.ratelimitremaining;
+                delete node.ratelimitreset;
+            }
+        }
+        return new Promise((resolve) => setTimeout(resolve, 0));
     }
 
     function RaptPullNode(config) {
@@ -109,74 +149,8 @@ module.exports = function(RED) {
         node.split = config.split;
         node.raptConfig = RED.nodes.getNode(node.account);
         
-        var opts = {};
-
         node.on('input', function(msg) {
-            let endpoint = node.endpoint;
-            let topic = node.topic || endpoint;
-            let split = node.split;
-
-            
-            let payload = msg.payload;
-            if (!Array.isArray(payload)){
-                payload = [payload];
-            }
-            payload.forEach(function (element) {
-                node.status({fill:"blue",shape:"dot",text:"requesting"});
-                opts = {};
-                switch (endpoint.toLowerCase()){
-                    case 'gettelemetry':
-                        opts.hydrometerId = element.id;
-                        if (undefined == opts.hydrometerId){ 
-                            node.error("no hydrometerId found");
-                            return null;
-                        }
-                        // keep track of last time we requested telemetry for each hydrometer
-                        let lasttelemetryobj = nodeContext.get('lastTelemetry')||{};
-                        let lasttelemetry = lasttelemetryobj?.[opts.hydrometerId];
-                        let start = msg?.start || lasttelemetry || Date.now();
-                        let startDate = new Date(start);
-                        let end = msg?.end || Date.now();
-                        let endDate = new Date(end);
-                        opts.startDate = startDate.toISOString();
-                        opts.endDate = endDate.toISOString();
-                        lasttelemetryobj[opts.hydrometerId] = endDate.getTime();
-                        nodeContext.set('lastTelemetry',lasttelemetryobj);
-                    case 'gethydrometer':
-                        opts.hydrometerId = element.id;
-                        if (undefined == opts.hydrometerId){ 
-                            node.error("no hydrometerId found");
-                            return null;
-                        }
-                        break;
-                    case 'gethydrometers':
-                        /* no parms for this one*/
-                        break;
-                    default:
-                    /* unsupported endpoint */
-                    throw new Error("unsupported endpoint: " + endpoint);
-                }
-
-                node.raptConfig.authorise()
-                .then(() =>node.getEndpoint(endpoint,opts))
-                .then((result) => {
-                    if(Array.isArray(result)&&split){
-                        result.forEach(function (element) {
-                            const newmsg = {};
-                            newmsg.topic = topic;
-                            newmsg.payload = element;
-                            node.send(newmsg);
-                        });
-                    } else {
-                        const newmsg = {};
-                        newmsg.topic = topic;
-                        newmsg.payload = result;
-                        node.send(newmsg);
-                    }
-                    return null;
-                });
-            });
-
+            node.processMsg(msg);
         });
     }
     
@@ -195,5 +169,80 @@ module.exports = function(RED) {
             node.error(err);
         })
     }
+    RaptPullNode.prototype.processMsg = async function(msg) {
+        var node = this;
+        var nodeContext = this.context();
+        let endpoint = node.endpoint;
+        let topic = node.topic || endpoint;
+        let split = node.split;
+        let payload = msg.payload;
+        if (!Array.isArray(payload)){
+            payload = [payload];
+        }
+        let msgstart = msg?.start;
+        let msgend = msg?.end;
+
+        for (const element of payload){
+            await node.processElement(element, endpoint, topic, split,msgstart,msgend);
+        }
+    }
     
+    RaptPullNode.prototype.processElement = async function(element, endpoint, topic, split,msgstart,msgend) {
+        var node = this;
+        var nodeContext = this.context();
+        var opts = {};
+        switch (endpoint.toLowerCase()){
+            case 'gettelemetry':
+                opts.hydrometerId = element.id;
+                if (undefined == opts.hydrometerId){ 
+                    node.error("no hydrometerId found");
+                    return null;
+                }
+                // keep track of last time we requested telemetry for each hydrometer
+                let lasttelemetryobj = nodeContext.get('lastTelemetry')||{};
+                let lasttelemetry = lasttelemetryobj?.[opts.hydrometerId];
+                let start = msgstart || lasttelemetry || Date.now();
+                let startDate = new Date(start);
+                let end = msgend || Date.now();
+                let endDate = new Date(end);
+                opts.startDate = startDate.toISOString();
+                opts.endDate = endDate.toISOString();
+                lasttelemetryobj[opts.hydrometerId] = endDate.getTime();
+                nodeContext.set('lastTelemetry',lasttelemetryobj);
+            case 'gethydrometer':
+                opts.hydrometerId = element.id;
+                if (undefined == opts.hydrometerId){ 
+                    node.error("no hydrometerId found");
+                    return null;
+                }
+                break;
+            case 'gethydrometers':
+                /* no parms for this one*/
+                break;
+            default:
+            /* unsupported endpoint */
+            throw new Error("unsupported endpoint: " + endpoint);
+        }
+
+        return node.raptConfig.ratelimit(node)
+        .then(() =>node.raptConfig.authorise(node))
+        .then(() =>node.getEndpoint(endpoint,opts))
+        .then((result) => {
+            if(Array.isArray(result)&&split){
+                result.forEach(function (element) {
+                    const newmsg = {};
+                    newmsg.topic = topic;
+                    newmsg.payload = element;
+                    node.send(newmsg);
+                });
+            } else {
+                const newmsg = {};
+                newmsg.topic = topic;
+                newmsg.payload = result;
+                node.send(newmsg);
+            }
+            return null;
+        });
+    }
+
 }
